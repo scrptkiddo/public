@@ -2,34 +2,36 @@ specification {
   element actor {
     style {
       shape person
-      color secondary
+      color gray
     }
   }
   element system {
     style {
       shape rectangle
-      color blue
+      color primary
     }
   }
   element ui {
     style {
       shape browser
-      color muted
+      color gray
     }
   }
   element service {
     style {
-      color primary
+      shape rectangle
+      color indigo
     }
   }
   element external {
     style {
+      shape rectangle
       color amber
     }
   }
   element storage {
     style {
-      shape storage
+      shape cylinder
       color green
     }
   }
@@ -39,6 +41,8 @@ specification {
       color indigo
     }
   }
+  tag async
+  tag sync
 }
 
 model {
@@ -48,64 +52,91 @@ model {
 
   system bookshop 'Интернет-магазин книг' {
     frontend = ui 'Frontend' {
+      icon tech:react
+      technology 'React / Next.js'
       description 'Checkout UI, 3DS iframe'
     }
 
     apiGateway = service 'API Gateway' {
+      icon tech:nginx
+      technology 'Nginx / Go'
       description 'JWT-аутентификация, маршрутизация запросов'
     }
 
     cartService = service 'Cart Service' {
+      icon tech:redis
+      technology 'Go / Redis'
       description 'Валидация и управление корзиной'
     }
 
     inventoryService = service 'Inventory Service' {
+      icon tech:postgresql
+      technology 'Go / PostgreSQL'
       description 'Проверка стока, soft-резервирование'
     }
 
     orderService = service 'Order Service' {
+      icon tech:go
+      technology 'Go / gRPC'
       description 'Создание заказа, управление статусами'
     }
 
     userProfileService = service 'User Profile Service' {
+      icon tech:nodejs
+      technology 'Node.js'
       description 'Данные пользователя, адреса, токенизированные карты'
     }
 
     paymentService = service 'Payment Service' {
+      icon tech:java
+      technology 'Java / Spring'
       description 'Оркестрация платёжного флоу, обработка webhook, уточнение задержанного статуса'
     }
 
     notificationService = service 'Notification Service' {
+      icon tech:go
+      technology 'Go'
       description 'Отправка email и push-уведомлений'
     }
 
     eventBus = bus 'Event Bus (Kafka)' {
-      description 'order.created · payment.succeeded · payment.failed · order.paid · order.cancelled'
+      icon tech:kafka
+      technology 'Apache Kafka'
+      description 'Aсинхронная шина событий (order.paid, payment.succeeded...)'
     }
 
     orderDb = storage 'Order DB' {
+      icon tech:postgresql
+      technology 'PostgreSQL'
       description 'Персистентность заказов'
     }
 
     paymentDb = storage 'Payment DB' {
+      icon tech:postgresql
+      technology 'PostgreSQL'
       description 'Журнал платёжных транзакций'
     }
   }
 
   paymentGateway = external 'Payment Gateway' {
-    description 'Stripe / Adyen — обработка карточных транзакций'
+    icon tech:stripe
+    technology 'Stripe / Adyen'
+    description 'Обработка карточных транзакций'
   }
 
   bank = external 'Банк покупателя' {
+    technology '3D-Secure API'
     description 'Авторизация транзакции, 3DS, списание средств'
   }
 
   deliveryService = external 'Delivery Service' {
+    technology 'External API'
     description 'Получает подтверждённый заказ для дальнейшей доставки'
   }
 
   emailProvider = external 'Email Provider' {
-    description 'SMTP / API рассылки'
+    technology 'SMTP / SendGrid'
+    description 'Рассылка транзакционных писем'
   }
 
   // ---- Relationships ----
@@ -123,7 +154,7 @@ model {
   apiGateway -> paymentService    'CreatePaymentAttempt / GetPayment  [REST]'
 
   orderService -> inventoryService 'ReserveItems  [gRPC]'
-  orderService -> orderService    'Cron: cancel expired orders'
+  // orderService -> orderService 'Cron: cancel expired orders'
   orderService -> orderDb         'persist'
   orderService -> eventBus        'publishes order.created / order.paid / order.cancelled'
 
@@ -138,11 +169,21 @@ model {
 
   frontend -> bank 'Redirect for 3DS confirmation'
 
-  eventBus -> orderService          'payment.succeeded / payment.failed -> update order status'
-  eventBus -> cartService           'order.paid -> clear cart'
-  eventBus -> notificationService   'order.paid -> send email'
-  eventBus -> inventoryService      'order.cancelled -> release reserve'
-  eventBus -> deliveryService       'order.paid -> start delivery'
+  eventBus -> orderService          'payment.succeeded / payment.failed -> update order status' {
+    style { line dashed }
+  }
+  eventBus -> cartService           'order.paid -> clear cart' {
+    style { line dashed }
+  }
+  eventBus -> notificationService   'order.paid -> send email' {
+    style { line dashed }
+  }
+  eventBus -> inventoryService      'order.cancelled -> release reserve' {
+    style { line dashed }
+  }
+  eventBus -> deliveryService       'order.paid -> start delivery' {
+    style { line dashed }
+  }
 
   notificationService -> emailProvider 'SendEmail  [SMTP/API]'
   emailProvider -> buyer 'Order confirmation email'
@@ -157,10 +198,9 @@ views {
       paymentGateway,
       bank,
       deliveryService,
-      emailProvider
-    include bookshop with {
-      navigateTo architecture_detail
-    }
+      emailProvider,
+      bookshop
+      
     autoLayout TopBottom
     rank source {
       buyer
@@ -171,7 +211,7 @@ views {
       emailProvider
     }
     style buyer {
-      color secondary
+      color gray
     }
   }
 
@@ -248,7 +288,8 @@ views {
     frontend -> buyer 'Показать prefilled checkout'
 
     buyer -> frontend 'Подтверждает заказ'
-    frontend -> aporderService 'CreateOrder [REST]'
+    frontend -> apiGateway 'POST /orders [HTTPS/REST]'
+    apiGateway -> orderService 'CreateOrder [REST]'
     parallel {
       orderService -> inventoryService 'ReserveItems [gRPC]'
       inventoryService -> orderService 'ReservationID + TTL'
@@ -258,8 +299,7 @@ views {
     }
     orderService -> eventBus 'order.created'
     orderService -> apiGateway 'Order(status=PENDING_PAYMENT)' {
-      notes 'Если покупатель не завершает оплату до истечения TTL, отрабатывает Cron (внутри OrderService): заказ отменяется и снимается резерв
-      notes 'Если покупатель не завершает оплату до истечения TTL, заказ отменяется и резерв снимается.'
+      notes 'Если покупатель не завершает оплату до истечения TTL, отрабатывает Cron (внутри OrderService): заказ отменяется и снимается резерв.'
     }
     apiGateway -> frontend 'Order created'
 
