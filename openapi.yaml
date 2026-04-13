@@ -1,0 +1,670 @@
+openapi: 3.0.3
+info:
+  title: Book Store Checkout API
+  version: 1.0.0
+  description: |
+    API для оформления покупки книги в интернет-магазине.
+    Включены только внешние HTTP endpoint'ы системы интернет-магазина
+    и входящий webhook от платёжного шлюза.
+    Исходящие вызовы к внешнему провайдеру оплаты в контракт не входят.
+
+servers:
+  - url: https://api.bookstore.example.com
+    description: Production
+
+tags:
+  - name: Checkout
+    description: Получение контекста оформления заказа
+  - name: Orders
+    description: Создание и получение заказа
+  - name: Payments
+    description: Запуск и контроль статуса оплаты
+  - name: Integration
+    description: Технические callback-контракты со стороны платёжного шлюза
+
+paths:
+  /checkout/context:
+    get:
+      tags:
+        - Checkout
+      summary: Получить контекст checkout
+      description: Возвращает состав корзины, итоговую стоимость и сохранённые данные покупателя для предзаполнения формы.
+      operationId: getCheckoutContext
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CartIdQuery'
+      responses:
+        '200':
+          description: Контекст checkout сформирован.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutContext'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /orders:
+    post:
+      tags:
+        - Orders
+      summary: Создать заказ из корзины
+      description: Проверяет состав корзины, фиксирует цену и создаёт заказ в статусе ожидания оплаты.
+      operationId: createOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Заказ успешно создан.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /orders/{orderId}:
+    get:
+      tags:
+        - Orders
+      summary: Получить заказ
+      description: Возвращает текущее состояние заказа и последней платёжной попытки.
+      operationId: getOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+      responses:
+        '200':
+          description: Состояние заказа получено.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderId}/payments:
+    post:
+      tags:
+        - Payments
+      summary: Запустить оплату по заказу
+      description: Создаёт или переиспользует актуальную платёжную попытку по заказу.
+      operationId: initiatePayment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePaymentRequest'
+      responses:
+        '202':
+          description: Платёжная попытка принята в обработку.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /payments/{paymentId}:
+    get:
+      tags:
+        - Payments
+      summary: Получить статус оплаты
+      description: Возвращает текущее состояние платёжной попытки и требуемое следующее действие.
+      operationId: getPayment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PaymentIdPath'
+      responses:
+        '200':
+          description: Статус оплаты получен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /integrations/payments/webhooks:
+    post:
+      tags:
+        - Integration
+      summary: Принять callback от платёжного шлюза
+      description: Служебный endpoint для обновления итогового статуса оплаты после обработки внешним провайдером.
+      operationId: receivePaymentWebhook
+      parameters:
+        - $ref: '#/components/parameters/GatewaySignatureHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentGatewayWebhook'
+      responses:
+        '202':
+          description: Событие принято в обработку.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcknowledgeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    CartIdQuery:
+      name: cartId
+      in: query
+      required: true
+      description: Идентификатор корзины текущего пользователя.
+      schema:
+        type: string
+        format: uuid
+    OrderIdPath:
+      name: orderId
+      in: path
+      required: true
+      description: Идентификатор заказа.
+      schema:
+        type: string
+        format: uuid
+    PaymentIdPath:
+      name: paymentId
+      in: path
+      required: true
+      description: Идентификатор платёжной попытки.
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Ключ, защищающий от повторного создания заказа или платёжной попытки.
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 64
+    GatewaySignatureHeader:
+      name: X-Gateway-Signature
+      in: header
+      required: true
+      description: Подпись события от платёжного шлюза.
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Запрос содержит некорректные данные.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: Требуется авторизация или подпись невалидна.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Ресурс не найден.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: Бизнес-состояние не позволяет выполнить операцию.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ValidationError:
+      description: Ошибка валидации пользовательских данных.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ServiceUnavailable:
+      description: Внешний платёжный сервис временно недоступен.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+  schemas:
+    CheckoutContext:
+      type: object
+      required:
+        - cartId
+        - userId
+        - currency
+        - reservationWindowMinutes
+        - items
+        - pricing
+        - savedPaymentMethods
+      properties:
+        cartId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        currency:
+          type: string
+          example: RUB
+        reservationWindowMinutes:
+          type: integer
+          minimum: 1
+          example: 30
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        pricing:
+          $ref: '#/components/schemas/Pricing'
+        defaultDeliveryAddress:
+          $ref: '#/components/schemas/Address'
+        savedPaymentMethods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodSummary'
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - cartId
+        - deliveryAddressId
+        - paymentMethodId
+        - acceptTerms
+      properties:
+        cartId:
+          type: string
+          format: uuid
+        deliveryAddressId:
+          type: string
+          format: uuid
+        paymentMethodId:
+          type: string
+          format: uuid
+        acceptTerms:
+          type: boolean
+          example: true
+        customerComment:
+          type: string
+          maxLength: 500
+          description: Необязательный комментарий покупателя к заказу.
+
+    Order:
+      type: object
+      required:
+        - orderId
+        - cartId
+        - userId
+        - status
+        - items
+        - totalAmount
+        - deliveryAddress
+        - paymentMethod
+        - createdAt
+        - updatedAt
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        cartId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        paymentStatus:
+          $ref: '#/components/schemas/PaymentStatus'
+        paymentId:
+          type: string
+          format: uuid
+        paymentMethodId:
+          type: string
+          format: uuid
+        reservedUntil:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        totalAmount:
+          $ref: '#/components/schemas/Money'
+        deliveryAddress:
+          $ref: '#/components/schemas/Address'
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethodSummary'
+        customerComment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    InitiatePaymentRequest:
+      type: object
+      required:
+        - returnUrl
+        - cancelUrl
+      properties:
+        returnUrl:
+          type: string
+          format: uri
+          description: URL, на который пользователь вернётся после успешного внешнего подтверждения.
+        cancelUrl:
+          type: string
+          format: uri
+          description: URL, на который пользователь вернётся при отмене или ошибке.
+        salesChannel:
+          type: string
+          enum:
+            - WEB
+            - MOBILE_WEB
+            - MOBILE_APP
+          default: WEB
+
+    Payment:
+      type: object
+      required:
+        - paymentId
+        - orderId
+        - status
+        - amount
+        - createdAt
+        - updatedAt
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        paymentMethodId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        amount:
+          $ref: '#/components/schemas/Money'
+        provider:
+          type: string
+          example: Adyen
+        gatewayReference:
+          type: string
+          description: Идентификатор платёжной операции на стороне внешнего провайдера.
+        nextAction:
+          $ref: '#/components/schemas/PaymentNextAction'
+        failureReason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PaymentGatewayWebhook:
+      type: object
+      required:
+        - eventId
+        - eventType
+        - occurredAt
+        - orderId
+        - paymentId
+        - status
+        - amount
+        - gatewayReference
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum:
+            - PAYMENT_SUCCEEDED
+            - PAYMENT_FAILED
+            - PAYMENT_REQUIRES_ACTION
+        occurredAt:
+          type: string
+          format: date-time
+        orderId:
+          type: string
+          format: uuid
+        paymentId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        amount:
+          $ref: '#/components/schemas/Money'
+        gatewayReference:
+          type: string
+        failureCode:
+          type: string
+        failureMessage:
+          type: string
+
+    CartItem:
+      type: object
+      required:
+        - bookId
+        - sku
+        - title
+        - quantity
+        - unitPrice
+        - lineTotal
+      properties:
+        bookId:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        title:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        lineTotal:
+          $ref: '#/components/schemas/Money'
+
+    Pricing:
+      type: object
+      required:
+        - subtotal
+        - discount
+        - deliveryFee
+        - total
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/Money'
+        discount:
+          $ref: '#/components/schemas/Money'
+        deliveryFee:
+          $ref: '#/components/schemas/Money'
+        total:
+          $ref: '#/components/schemas/Money'
+
+    Money:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 1590
+        currency:
+          type: string
+          example: RUB
+
+    Address:
+      type: object
+      required:
+        - addressId
+        - recipientName
+        - country
+        - city
+        - street
+        - house
+        - postalCode
+      properties:
+        addressId:
+          type: string
+          format: uuid
+        recipientName:
+          type: string
+        country:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        house:
+          type: string
+        apartment:
+          type: string
+        postalCode:
+          type: string
+
+    PaymentMethodSummary:
+      type: object
+      required:
+        - paymentMethodId
+        - brand
+        - maskedPan
+      properties:
+        paymentMethodId:
+          type: string
+          format: uuid
+        brand:
+          type: string
+          example: VISA
+        maskedPan:
+          type: string
+          example: 4111********1111
+        isDefault:
+          type: boolean
+
+    PaymentNextAction:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - NONE
+            - REDIRECT_TO_BANK
+            - POLL_STATUS
+        url:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+
+    AcknowledgeResponse:
+      type: object
+      required:
+        - accepted
+        - message
+      properties:
+        accepted:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Event accepted for processing.
+
+    Problem:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: ORDER_ALREADY_PAID
+        message:
+          type: string
+          example: Операция не может быть выполнена в текущем состоянии заказа.
+        details:
+          type: array
+          items:
+            type: string
+
+    OrderStatus:
+      type: string
+      enum:
+        - PENDING_PAYMENT
+        - PAID
+        - PAYMENT_FAILED
+        - CANCELLED
+
+    PaymentStatus:
+      type: string
+      enum:
+        - PROCESSING
+        - REQUIRES_ACTION
+        - SUCCEEDED
+        - FAILED
+        - CANCELLED

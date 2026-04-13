@@ -1,0 +1,56 @@
+sequenceDiagram
+    actor User as 👤 Пользователь
+    participant FE as Frontend (SPA)
+    participant GW as API Gateway
+    participant Cart as Cart Service
+    participant Inv as Inventory Service
+    participant Prof as User Profile Service
+    participant Ord as Order Service
+    participant Pay as Payment Service
+    participant PGW as Payment Gateway
+    participant Bank as 🏦 Банк
+    participant Kafka as 📨 Event Bus
+    participant Notif as Notification Service
+
+    User->>FE: Нажать "Оформить заказ"
+    FE->>GW: POST /checkout (JWT)
+    GW->>Cart: GetCart(cartId)
+    Cart-->>GW: CartSnapshot
+    GW->>Prof: GetUserDefaults(userId)
+    Prof-->>GW: Address + PaymentMethod
+    GW-->>FE: CheckoutData (prefilled)
+    FE-->>User: Показать форму checkout
+
+    User->>FE: Подтвердить заказ
+    FE->>GW: POST /orders (cartSnapshot + deliveryData)
+    GW->>Inv: ReserveItem(bookId, qty=1)
+    Inv-->>GW: ReservationID (TTL=30min)
+    GW->>Ord: CreateOrder(...)
+    Ord-->>GW: OrderID, Status=CONFIRMED
+    Ord->>Kafka: Publish order.created
+
+    GW->>Pay: InitiatePayment(orderId, amount)
+    Pay->>PGW: POST /payment-intents (token, amount, idempotency_key)
+    PGW-->>Pay: payment_intent_id, status=processing
+
+    alt 3DS Required
+        PGW-->>FE: Redirect to 3DS
+        FE-->>User: 3DS-окно банка
+        User->>Bank: Подтвердить платёж
+        Bank-->>PGW: 3DS Success
+    end
+
+    PGW->>Bank: Authorize transaction
+    Bank-->>PGW: Authorization code
+
+    PGW->>Pay: WEBHOOK payment_intent.succeeded
+    Pay->>Kafka: Publish payment.succeeded
+
+    Kafka->>Ord: Event: payment.succeeded
+    Ord->>Ord: Update Status → PAID
+
+    Kafka->>Notif: Event: payment.succeeded
+    Notif->>User: 📧 Email-квитанция
+
+    Ord-->>FE: Order confirmed
+    FE-->>User: ✅ Экран подтверждения

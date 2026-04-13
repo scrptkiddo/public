@@ -1,0 +1,30 @@
+flowchart TD
+    Browser["Browser \nCheckout UI, 3DS iframe"]
+    GW["API Gateway\nJWT auth, маршрутизация"]
+    Cart["Cart Service\nВалидация корзины"]
+    Inv["Inventory Service\nРезервирование стока"]
+    Ord["Order Service\nСоздание заказа"]
+    Pay["Payment Service\nОркестрация платежа"]
+    Prof["User Profile\nАдреса, карты"]
+    PGW["Payment Gateway\nStripe / Adyen"]
+    Bank["Bank\nАвторизация"]
+    Kafka["Event Bus — Kafka\norder.created · payment.succeeded"]
+    Notif["Notification Service\nEmail / Push"]
+    Elves["Elf Logistics\nМагия доставки 🧝"]
+
+    Browser -->|POST /checkout JWT| GW
+    GW --> Cart
+    GW --> Inv
+    GW --> Ord
+    GW --> Pay
+    GW -->|GetUserDefaults| Prof
+
+    Pay -->|POST /payment-intents| PGW
+    PGW -->|Authorize| Bank
+    PGW -.->|webhook| Pay
+
+    Ord -->|order.created| Kafka
+    Pay -->|payment.succeeded| Kafka
+
+    Kafka --> Notif
+    Kafka --> Elves

@@ -1,0 +1,301 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 2180" width="1320" height="2180" font-family="Segoe UI, Arial, sans-serif" font-size="12">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0,10 4,0 8" fill="#425466"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0,10 4,0 8" fill="#2f855a"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0,10 4,0 8" fill="#c53030"/>
+    </marker>
+    <marker id="messageArrow" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
+      <polyline points="0 1,11 5,0 9" fill="#ffffff" stroke="#64748b" stroke-width="1.4"/>
+    </marker>
+    <linearGradient id="taskFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <linearGradient id="gatewayFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff7d6"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <linearGradient id="labelFill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#00000026"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1320" height="2180" fill="#f8fafc"/>
+
+  <text x="660" y="38" text-anchor="middle" font-size="24" font-weight="bold" fill="#1f2937">BPMN: Бизнес-процесс покупки книги</text>
+  <text x="660" y="62" text-anchor="middle" font-size="12" fill="#52606d">Клиент показан как collapsed pool: магазин только реагирует на его действия и сообщения</text>
+
+  <rect x="42" y="82" width="520" height="118" rx="14" fill="#ffffff" stroke="#d7dee8" stroke-width="1.3"/>
+  <text x="62" y="110" font-size="13" font-weight="bold" fill="#334155">Правило моделирования</text>
+  <text x="62" y="136" font-size="11" fill="#475569">1. На схеме нет дорожек.</text>
+  <text x="62" y="158" font-size="11" fill="#475569">2. Покупатель показан как внешний blackbox participant в виде collapsed pool.</text>
+  <text x="62" y="180" font-size="11" fill="#475569">3. В основном потоке отражены только реакции магазина на действия клиента и внешние результаты оплаты.</text>
+
+  <rect x="820" y="82" width="458" height="138" rx="14" fill="#ffffff" stroke="#d7dee8" stroke-width="1.3"/>
+  <text x="842" y="110" font-size="13" font-weight="bold" fill="#334155">Условные обозначения</text>
+  <circle cx="858" cy="138" r="11" fill="#d9f99d" stroke="#4d7c0f" stroke-width="2"/>
+  <text x="884" y="142" font-size="11" fill="#475569">Событие</text>
+  <rect x="846" y="153" width="24" height="16" rx="4" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.5"/>
+  <text x="884" y="166" font-size="11" fill="#475569">Задача магазина</text>
+  <rect x="848" y="177" width="18" height="18" transform="rotate(45 857 186)" fill="url(#gatewayFill)" stroke="#b7791f" stroke-width="1.5"/>
+  <text x="884" y="190" font-size="11" fill="#475569">Gateway / решение</text>
+  <line x1="846" y1="208" x2="876" y2="208" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="884" y="212" font-size="11" fill="#475569">Message flow с внешним участником</text>
+  <rect x="1056" y="132" width="180" height="58" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1.6"/>
+  <rect x="1056" y="132" width="180" height="28" fill="#e2e8f0" stroke="#64748b" stroke-width="1.6"/>
+  <text x="1146" y="151" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Покупатель</text>
+  <text x="1146" y="178" text-anchor="middle" font-size="10" fill="#475569">collapsed pool / blackbox</text>
+
+  <rect x="40" y="252" width="160" height="1740" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1.8"/>
+  <rect x="40" y="252" width="160" height="42" fill="#e2e8f0" stroke="#64748b" stroke-width="1.8"/>
+  <text x="120" y="279" text-anchor="middle" font-size="13" font-weight="bold" fill="#334155">Покупатель</text>
+  <text x="120" y="314" text-anchor="middle" font-size="11" fill="#64748b">collapsed pool</text>
+  <text x="120" y="334" text-anchor="middle" font-size="11" fill="#64748b">blackbox</text>
+  <text x="120" y="382" text-anchor="middle" font-size="10" fill="#64748b">Клиент не</text>
+  <text x="120" y="398" text-anchor="middle" font-size="10" fill="#64748b">раскладывается</text>
+  <text x="120" y="414" text-anchor="middle" font-size="10" fill="#64748b">на внутренние шаги</text>
+
+  <rect x="1010" y="908" width="250" height="120" rx="12" fill="#ffffff" stroke="#d7dee8" stroke-width="1.3"/>
+  <text x="1030" y="934" font-size="12" font-weight="bold" fill="#334155">Внешние статусы оплаты</text>
+  <text x="1030" y="958" font-size="11" fill="#475569">Итог оплаты и результат</text>
+  <text x="1030" y="978" font-size="11" fill="#475569">дополнительного подтверждения</text>
+  <text x="1030" y="998" font-size="11" fill="#475569">поступают как внешние сообщения</text>
+
+  <circle cx="660" cy="316" r="22" fill="#d9f99d" stroke="#4d7c0f" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="660" y="321" text-anchor="middle" font-size="11" font-weight="bold" fill="#3f6212">Старт</text>
+  <text x="720" y="321" font-size="10" fill="#64748b">Получен запрос на оформление заказа</text>
+  <line x1="200" y1="316" x2="638" y2="316" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="268" y="305" font-size="11" fill="#64748b">Оформить заказ</text>
+
+  <line x1="660" y1="338" x2="660" y2="380" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="280" y="396" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="414" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="470" y="380" width="380" height="64" rx="12" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="660" y="406" text-anchor="middle" font-size="13" font-weight="bold" fill="#22304a">Подготовить checkout</text>
+  <text x="660" y="426" text-anchor="middle" font-size="11" fill="#475569">Собрать корзину, сумму заказа</text>
+  <text x="660" y="441" text-anchor="middle" font-size="11" fill="#475569">и сохранённые данные покупателя</text>
+
+  <line x1="660" y1="444" x2="660" y2="486" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="280" y="502" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="520" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="470" y="486" width="380" height="64" rx="12" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="660" y="512" text-anchor="middle" font-size="13" font-weight="bold" fill="#22304a">Показать данные заказа</text>
+  <text x="660" y="532" text-anchor="middle" font-size="11" fill="#475569">Показать состав заказа, адрес доставки</text>
+  <text x="660" y="547" text-anchor="middle" font-size="11" fill="#475569">и способ оплаты</text>
+  <line x1="470" y1="518" x2="200" y2="518" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="252" y="507" font-size="11" fill="#64748b">Checkout и данные заказа</text>
+
+  <line x1="660" y1="550" x2="660" y2="590" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <circle cx="660" cy="620" r="24" fill="#ffffff" stroke="#5875c4" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="660" cy="620" r="18" fill="none" stroke="#5875c4" stroke-width="1.5"/>
+  <text x="660" y="614" text-anchor="middle" font-size="9" fill="#22304a">Данные</text>
+  <text x="660" y="625" text-anchor="middle" font-size="9" fill="#22304a">получены</text>
+  <text x="720" y="624" font-size="10" fill="#64748b">Получены подтверждённые или скорректированные данные</text>
+  <line x1="200" y1="620" x2="636" y2="620" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="246" y="609" font-size="11" fill="#64748b">Подтверждение или корректировки</text>
+
+  <line x1="660" y1="644" x2="660" y2="682" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="633" y="682" width="54" height="54" rx="4" transform="rotate(45 660 709)" fill="url(#gatewayFill)" stroke="#b7791f" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="704" text-anchor="middle" font-size="11" fill="#5b3a08">Книга</text>
+  <text x="660" y="717" text-anchor="middle" font-size="11" fill="#5b3a08">доступна?</text>
+
+  <line x1="633" y1="709" x2="458" y2="709" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <text x="532" y="698" font-size="11" fill="#c53030">Нет</text>
+  <rect x="280" y="694" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="712" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="210" y="736" width="240" height="60" rx="12" fill="#fff1f2" stroke="#c53030" stroke-width="1.6" filter="url(#shadow)"/>
+  <text x="330" y="760" text-anchor="middle" font-size="12" font-weight="bold" fill="#8b1e1e">Сообщить о недоступности</text>
+  <text x="330" y="778" text-anchor="middle" font-size="10" fill="#7f1d1d">Не создавать заказ и вернуть в корзину</text>
+  <line x1="210" y1="766" x2="200" y2="766" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="222" y="724" font-size="11" fill="#64748b">Сообщение о недоступности</text>
+  <line x1="330" y1="796" x2="330" y2="852" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <circle cx="330" cy="878" r="23" fill="#fee2e2" stroke="#c53030" stroke-width="2.5" filter="url(#shadow)"/>
+  <circle cx="330" cy="878" r="17" fill="none" stroke="#c53030" stroke-width="2"/>
+  <text x="330" y="883" text-anchor="middle" font-size="11" font-weight="bold" fill="#7f1d1d">Стоп</text>
+
+  <line x1="660" y1="736" x2="660" y2="778" stroke="#2f855a" stroke-width="1.8" marker-end="url(#arrowGreen)"/>
+  <text x="670" y="760" font-size="11" fill="#2f855a">Да</text>
+
+  <rect x="280" y="794" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="812" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="470" y="778" width="380" height="60" rx="12" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="660" y="803" text-anchor="middle" font-size="13" font-weight="bold" fill="#22304a">Зарезервировать книгу</text>
+  <text x="660" y="821" text-anchor="middle" font-size="11" fill="#475569">Удержать товар за покупателем</text>
+  <text x="660" y="836" text-anchor="middle" font-size="11" fill="#475569">на время завершения оплаты</text>
+
+  <line x1="660" y1="838" x2="660" y2="880" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="280" y="896" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="914" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="470" y="880" width="380" height="60" rx="12" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="660" y="905" text-anchor="middle" font-size="13" font-weight="bold" fill="#22304a">Создать заказ и зафиксировать сумму</text>
+  <text x="660" y="923" text-anchor="middle" font-size="11" fill="#475569">Заказ переходит в состояние</text>
+  <text x="660" y="938" text-anchor="middle" font-size="11" fill="#475569">ожидания оплаты</text>
+
+  <line x1="660" y1="940" x2="660" y2="982" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="633" y="982" width="54" height="54" rx="4" transform="rotate(45 660 1009)" fill="url(#gatewayFill)" stroke="#b7791f" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="1001" text-anchor="middle" font-size="10" fill="#5b3a08">Ожидание</text>
+  <text x="660" y="1014" text-anchor="middle" font-size="10" fill="#5b3a08">действия</text>
+  <text x="660" y="1026" text-anchor="middle" font-size="10" fill="#5b3a08">клиента</text>
+
+  <line x1="633" y1="1009" x2="444" y2="1009" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <text x="520" y="998" font-size="11" fill="#c53030">Резерв истёк</text>
+  <circle cx="408" cy="1009" r="24" fill="#ffffff" stroke="#c53030" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="408" cy="1009" r="18" fill="none" stroke="#c53030" stroke-width="1.5"/>
+  <text x="408" y="1003" text-anchor="middle" font-size="9" fill="#7f1d1d">Timer</text>
+  <text x="408" y="1014" text-anchor="middle" font-size="9" fill="#7f1d1d">истёк</text>
+  <rect x="210" y="1054" width="240" height="60" rx="12" fill="#fff1f2" stroke="#c53030" stroke-width="1.6" filter="url(#shadow)"/>
+  <text x="330" y="1078" text-anchor="middle" font-size="12" font-weight="bold" fill="#8b1e1e">Аннулировать заказ и снять резерв</text>
+  <text x="330" y="1096" text-anchor="middle" font-size="10" fill="#7f1d1d">Оформление прервано из-за истечения времени</text>
+  <line x1="330" y1="1114" x2="330" y2="1170" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <line x1="210" y1="1084" x2="200" y2="1084" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="224" y="1042" font-size="11" fill="#64748b">Сообщение об отмене заказа</text>
+  <circle cx="330" cy="1196" r="23" fill="#fee2e2" stroke="#c53030" stroke-width="2.5" filter="url(#shadow)"/>
+  <circle cx="330" cy="1196" r="17" fill="none" stroke="#c53030" stroke-width="2"/>
+  <text x="330" y="1201" text-anchor="middle" font-size="11" font-weight="bold" fill="#7f1d1d">Стоп</text>
+
+  <line x1="660" y1="1036" x2="660" y2="1080" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <circle cx="660" cy="1110" r="24" fill="#ffffff" stroke="#5875c4" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="660" cy="1110" r="18" fill="none" stroke="#5875c4" stroke-width="1.5"/>
+  <text x="660" y="1104" text-anchor="middle" font-size="9" fill="#22304a">Запрос</text>
+  <text x="660" y="1115" text-anchor="middle" font-size="9" fill="#22304a">на оплату</text>
+  <text x="720" y="1114" font-size="10" fill="#64748b">Получен запрос на оплату</text>
+  <line x1="200" y1="1110" x2="636" y2="1110" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="264" y="1098" font-size="11" fill="#64748b">Инициировать оплату</text>
+
+  <line x1="660" y1="1134" x2="660" y2="1172" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="633" y="1172" width="54" height="54" rx="4" transform="rotate(45 660 1199)" fill="url(#gatewayFill)" stroke="#b7791f" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="1191" text-anchor="middle" font-size="10" fill="#5b3a08">Нужно</text>
+  <text x="660" y="1204" text-anchor="middle" font-size="10" fill="#5b3a08">доп.</text>
+  <text x="660" y="1216" text-anchor="middle" font-size="10" fill="#5b3a08">подтв.?</text>
+
+  <line x1="660" y1="1226" x2="660" y2="1268" stroke="#2f855a" stroke-width="1.8" marker-end="url(#arrowGreen)"/>
+  <text x="670" y="1250" font-size="11" fill="#2f855a">Да</text>
+
+  <rect x="280" y="1284" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="1302" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="470" y="1268" width="380" height="60" rx="12" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="660" y="1293" text-anchor="middle" font-size="13" font-weight="bold" fill="#22304a">Направить на дополнительное подтверждение</text>
+  <text x="660" y="1311" text-anchor="middle" font-size="11" fill="#475569">Отправить покупателю ссылку или экран</text>
+  <text x="660" y="1326" text-anchor="middle" font-size="11" fill="#475569">для подтверждения операции</text>
+  <line x1="470" y1="1300" x2="200" y2="1300" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="226" y="1288" font-size="11" fill="#64748b">Запрос на подтверждение операции</text>
+
+  <line x1="660" y1="1328" x2="660" y2="1370" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <circle cx="660" cy="1400" r="24" fill="#ffffff" stroke="#5875c4" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="660" cy="1400" r="18" fill="none" stroke="#5875c4" stroke-width="1.5"/>
+  <text x="660" y="1394" text-anchor="middle" font-size="9" fill="#22304a">Результат</text>
+  <text x="660" y="1405" text-anchor="middle" font-size="9" fill="#22304a">получен</text>
+  <text x="720" y="1404" font-size="10" fill="#64748b">Получен результат дополнительного подтверждения</text>
+  <line x1="200" y1="1400" x2="636" y2="1400" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="232" y="1388" font-size="11" fill="#64748b">Результат подтверждения</text>
+
+  <line x1="660" y1="1424" x2="660" y2="1462" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="633" y="1462" width="54" height="54" rx="4" transform="rotate(45 660 1489)" fill="url(#gatewayFill)" stroke="#b7791f" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="1481" text-anchor="middle" font-size="10" fill="#5b3a08">Подтв.</text>
+  <text x="660" y="1494" text-anchor="middle" font-size="10" fill="#5b3a08">успешно?</text>
+
+  <line x1="633" y1="1489" x2="458" y2="1489" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <text x="532" y="1478" font-size="11" fill="#c53030">Нет</text>
+  <rect x="280" y="1474" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="1492" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="210" y="1516" width="240" height="60" rx="12" fill="#fff1f2" stroke="#c53030" stroke-width="1.6" filter="url(#shadow)"/>
+  <text x="330" y="1540" text-anchor="middle" font-size="12" font-weight="bold" fill="#8b1e1e">Отклонить текущую попытку оплаты</text>
+  <text x="330" y="1558" text-anchor="middle" font-size="10" fill="#7f1d1d">Разрешить выбрать другой способ или повторить позже</text>
+  <line x1="210" y1="1546" x2="200" y2="1546" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="220" y="1504" font-size="11" fill="#64748b">Оплата отклонена</text>
+  <line x1="330" y1="1576" x2="330" y2="1632" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <circle cx="330" cy="1658" r="23" fill="#fee2e2" stroke="#c53030" stroke-width="2.5" filter="url(#shadow)"/>
+  <circle cx="330" cy="1658" r="17" fill="none" stroke="#c53030" stroke-width="2"/>
+  <text x="330" y="1663" text-anchor="middle" font-size="11" font-weight="bold" fill="#7f1d1d">Стоп</text>
+
+  <path d="M 687 1489 L 840 1489 L 840 1548 L 660 1548" fill="none" stroke="#2f855a" stroke-width="1.8" marker-end="url(#arrowGreen)"/>
+  <text x="742" y="1478" font-size="11" fill="#2f855a">Да</text>
+
+  <circle cx="660" cy="1578" r="24" fill="#ffffff" stroke="#5875c4" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="660" cy="1578" r="18" fill="none" stroke="#5875c4" stroke-width="1.5"/>
+  <text x="660" y="1572" text-anchor="middle" font-size="9" fill="#22304a">Итог</text>
+  <text x="660" y="1583" text-anchor="middle" font-size="9" fill="#22304a">получен</text>
+  <text x="720" y="1582" font-size="10" fill="#64748b">Получен итог оплаты</text>
+  <text x="720" y="1596" font-size="10" fill="#94a3b8">Источник: платёжная сторона</text>
+
+  <line x1="660" y1="1602" x2="660" y2="1640" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="633" y="1640" width="54" height="54" rx="4" transform="rotate(45 660 1667)" fill="url(#gatewayFill)" stroke="#b7791f" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="1659" text-anchor="middle" font-size="10" fill="#5b3a08">Статус</text>
+  <text x="660" y="1672" text-anchor="middle" font-size="10" fill="#5b3a08">получен</text>
+  <text x="660" y="1684" text-anchor="middle" font-size="10" fill="#5b3a08">вовремя?</text>
+
+  <line x1="633" y1="1667" x2="458" y2="1667" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <text x="520" y="1656" font-size="11" fill="#c53030">Нет</text>
+  <rect x="280" y="1652" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="1670" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="210" y="1694" width="240" height="60" rx="12" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="330" y="1718" text-anchor="middle" font-size="12" font-weight="bold" fill="#22304a">Уточнить итог оплаты</text>
+  <text x="330" y="1736" text-anchor="middle" font-size="10" fill="#475569">Запросить и сверить финальный статус</text>
+  <path d="M 330 1754 L 330 1806 L 660 1806" fill="none" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <line x1="660" y1="1694" x2="660" y2="1806" stroke="#2f855a" stroke-width="1.8" marker-end="url(#arrowGreen)"/>
+  <text x="670" y="1748" font-size="11" fill="#2f855a">Да</text>
+
+  <rect x="633" y="1806" width="54" height="54" rx="4" transform="rotate(45 660 1833)" fill="url(#gatewayFill)" stroke="#b7791f" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="1825" text-anchor="middle" font-size="10" fill="#5b3a08">Оплата</text>
+  <text x="660" y="1838" text-anchor="middle" font-size="10" fill="#5b3a08">успешна?</text>
+
+  <line x1="633" y1="1833" x2="458" y2="1833" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <text x="520" y="1822" font-size="11" fill="#c53030">Нет</text>
+  <rect x="280" y="1818" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="1836" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="210" y="1860" width="240" height="60" rx="12" fill="#fff1f2" stroke="#c53030" stroke-width="1.6" filter="url(#shadow)"/>
+  <text x="330" y="1884" text-anchor="middle" font-size="12" font-weight="bold" fill="#8b1e1e">Сохранить заказ для новой попытки</text>
+  <text x="330" y="1902" text-anchor="middle" font-size="10" fill="#7f1d1d">Не подтверждать заказ, оставить возможность повтора</text>
+  <line x1="210" y1="1890" x2="200" y2="1890" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="214" y="1848" font-size="11" fill="#64748b">Можно повторить оплату</text>
+  <line x1="330" y1="1920" x2="330" y2="1974" stroke="#c53030" stroke-width="1.8" marker-end="url(#arrowRed)" stroke-dasharray="6,4"/>
+  <circle cx="330" cy="2000" r="23" fill="#fee2e2" stroke="#c53030" stroke-width="2.5" filter="url(#shadow)"/>
+  <circle cx="330" cy="2000" r="17" fill="none" stroke="#c53030" stroke-width="2"/>
+  <text x="330" y="2005" text-anchor="middle" font-size="11" font-weight="bold" fill="#7f1d1d">Стоп</text>
+
+  <line x1="660" y1="1860" x2="660" y2="1902" stroke="#2f855a" stroke-width="1.8" marker-end="url(#arrowGreen)"/>
+  <text x="670" y="1884" font-size="11" fill="#2f855a">Да</text>
+
+  <rect x="280" y="1918" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="1936" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="470" y="1902" width="380" height="60" rx="12" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="660" y="1927" text-anchor="middle" font-size="13" font-weight="bold" fill="#22304a">Подтвердить заказ</text>
+  <text x="660" y="1945" text-anchor="middle" font-size="11" fill="#475569">Зафиксировать успешное завершение</text>
+  <text x="660" y="1960" text-anchor="middle" font-size="11" fill="#475569">процесса покупки</text>
+
+  <line x1="660" y1="1962" x2="660" y2="2004" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="280" y="2020" width="146" height="28" rx="14" fill="url(#labelFill)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="353" y="2038" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">Интернет-магазин</text>
+  <rect x="470" y="2004" width="380" height="60" rx="12" fill="url(#taskFill)" stroke="#5875c4" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="660" y="2029" text-anchor="middle" font-size="13" font-weight="bold" fill="#22304a">Показать подтверждение и отправить уведомление</text>
+  <text x="660" y="2047" text-anchor="middle" font-size="11" fill="#475569">Покупатель видит подтверждение</text>
+  <text x="660" y="2062" text-anchor="middle" font-size="11" fill="#475569">и получает сообщение о покупке</text>
+  <line x1="470" y1="2034" x2="200" y2="2034" stroke="#64748b" stroke-width="1.4" stroke-dasharray="6,4" marker-end="url(#messageArrow)"/>
+  <text x="220" y="1992" font-size="11" fill="#64748b">Подтверждение и уведомление</text>
+
+  <line x1="660" y1="2064" x2="660" y2="2104" stroke="#425466" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <circle cx="660" cy="2128" r="23" fill="#d9f99d" stroke="#4d7c0f" stroke-width="2.5" filter="url(#shadow)"/>
+  <circle cx="660" cy="2128" r="17" fill="none" stroke="#4d7c0f" stroke-width="2"/>
+  <text x="660" y="2133" text-anchor="middle" font-size="11" font-weight="bold" fill="#3f6212">Финиш</text>
+</svg>

@@ -1,0 +1,13 @@
+{
+  "name": "bookshop-likec4",
+  "private": true,
+  "scripts": {
+    "dev": "likec4 dev",
+    "build": "likec4 build -o ./dist --base ./ --use-hash-history",
+    "preview": "likec4 preview -o ./dist",
+    "validate": "likec4 validate"
+  },
+  "devDependencies": {
+    "likec4": "1.55.0"
+  }
+}

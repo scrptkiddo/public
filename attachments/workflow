@@ -1,0 +1,75 @@
+flowchart TD
+    A([👤 Пользователь\nоткрывает корзину]) --> B[Нажимает\n'Оформить заказ']
+    B --> C{API Gateway:\nПроверка JWT-токена}
+    C -- Токен невалиден --> C1[Редирект на логин]
+    C1 --> C
+    C -- Токен валиден --> D[Cart Service:\nВалидация корзины]
+    D --> E{Корзина\nне пуста?}
+    E -- Нет --> E1[Показать сообщение:\n'Корзина пуста']
+    E1 --> A
+    E -- Да --> F[User Profile Service:\nПолучить сохранённые данные]
+    F --> G[Frontend:\nПредзаполнить форму checkout\nадрес + способ оплаты]
+
+    G --> H[Пользователь\nпроверяет данные]
+    H --> H1{Нужно изменить\nданные?}
+    H1 -- Да --> H2[Пользователь редактирует\nадрес / способ оплаты]
+    H2 --> H
+    H1 -- Нет --> I[Нажимает 'Подтвердить заказ']
+
+    I --> J[Inventory Service:\nПроверка наличия книги]
+    J --> K{Книга\nв наличии?}
+    K -- Нет --> K1[Показать ошибку:\n'Товар закончился'\nПредложить уведомление]
+    K -- Да --> L[Inventory Service:\nМягкое резервирование\n+таймер 30 мин]
+
+    L --> M[Order Service:\nСоздание заказа\nСтатус: CONFIRMED]
+    M --> N[Order Service публикует\norder.created в Kafka]
+    N --> O[Payment Service:\nСоздание платёжной сессии\nIdempotency key = OrderID]
+
+    O --> P[Payment Service → Payment Gateway:\nPOST /v1/payment-intents]
+    P --> Q{Требуется\n3DS?}
+    Q -- Да --> R[Frontend:\nОткрыть 3DS-окно\nБанк аутентифицирует]
+    R --> S{3DS\nпройдена?}
+    S -- Нет --> S1[Payment: FAILED\nОшибка аутентификации]
+    S1 --> FAIL
+    Q -- Нет --> T[Payment Gateway\nотправляет запрос в Банк]
+    S -- Да --> T
+
+    T --> U{Банк:\nАвторизация транзакции}
+    U -- Недостаточно средств --> V1[Payment Gateway:\nDeclined]
+    U -- Карта заблокирована --> V2[Payment Gateway:\nDeclined]
+    U -- Технический сбой --> V3[Payment Gateway:\nTimeout / Error]
+    U -- Успех --> W[Банк:\nСписание средств\nАвторизация]
+
+    V1 --> FAIL
+    V2 --> FAIL
+    V3 --> RETRY{Повтор?\nretry < 3}
+    RETRY -- Да --> T
+    RETRY -- Нет --> FAIL
+
+    W --> X[Payment Gateway:\nWebhook → Payment Service\npayment_intent.succeeded]
+    X --> Y[Payment Service:\nОбновить статус → SUCCESS]
+    Y --> Z[Kafka: публикация\npayment.succeeded]
+
+    Z --> AA[Order Service:\nСтатус заказа → PAID]
+    Z --> BB[Notification Service:\nОтправить email-квитанцию]
+    Z --> CC[🧝 Elf Logistics:\nПолучить событие order.confirmed\nМагия начинается...]
+
+    AA --> DD[Frontend:\nЭкран подтверждения\nOrderID + Summary]
+    BB --> EE[📧 Пользователь получает\nemail с деталями заказа]
+
+    DD --> END([✅ Процесс завершён])
+    EE --> END
+
+    FAIL[Payment Service:\nСтатус → FAILED\nKafka: payment.failed] --> FAIL2[Order Service:\nСтатус → PAYMENT_FAILED]
+    FAIL2 --> FAIL3[Inventory Service:\nСнять резерв]
+    FAIL3 --> FAIL4[Frontend:\nЭкран ошибки оплаты\nПредложить повторить]
+    FAIL4 --> RETRY2{Пользователь\nхочет повторить?}
+    RETRY2 -- Да --> O
+    RETRY2 -- Нет --> CANCEL[Order Service:\nСтатус → CANCELLED]
+    CANCEL --> END2([❌ Заказ отменён])
+
+    style A fill:#4A90D9,color:#fff
+    style END fill:#27AE60,color:#fff
+    style END2 fill:#E74C3C,color:#fff
+    style CC fill:#8E44AD,color:#fff
+    style FAIL fill:#E74C3C,color:#fff
