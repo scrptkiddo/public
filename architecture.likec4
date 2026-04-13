@@ -118,11 +118,12 @@ model {
   }
 
   apiGateway -> cartService       'GetCart  [gRPC]'
-  apiGateway -> inventoryService  'ReserveItems  [gRPC]'
   apiGateway -> orderService      'CreateOrder / GetOrder  [REST]'
   apiGateway -> userProfileService 'GetUserDefaults  [REST]'
   apiGateway -> paymentService    'CreatePaymentAttempt / GetPayment  [REST]'
 
+  orderService -> inventoryService 'ReserveItems  [gRPC]'
+  orderService -> orderService    'Cron: cancel expired orders'
   orderService -> orderDb         'persist'
   orderService -> eventBus        'publishes order.created / order.paid / order.cancelled'
 
@@ -138,6 +139,7 @@ model {
   frontend -> bank 'Redirect for 3DS confirmation'
 
   eventBus -> orderService          'payment.succeeded / payment.failed -> update order status'
+  eventBus -> cartService           'order.paid -> clear cart'
   eventBus -> notificationService   'order.paid -> send email'
   eventBus -> inventoryService      'order.cancelled -> release reserve'
   eventBus -> deliveryService       'order.paid -> start delivery'
@@ -246,12 +248,17 @@ views {
     frontend -> buyer 'Показать prefilled checkout'
 
     buyer -> frontend 'Подтверждает заказ'
-    frontend -> apiGateway 'POST /orders [HTTPS/REST]'
-    apiGateway -> inventoryService 'ReserveItems [gRPC]'
-    inventoryService -> apiGateway 'ReservationID + TTL'
-    apiGateway -> orderService 'CreateOrder [REST]'
+    frontend -> aporderService 'CreateOrder [REST]'
+    parallel {
+      orderService -> inventoryService 'ReserveItems [gRPC]'
+      inventoryService -> orderService 'ReservationID + TTL'
+      
+      orderService -> cartService 'GetCart [gRPC]'
+      cartService -> orderService 'CartSnapshot'
+    }
     orderService -> eventBus 'order.created'
     orderService -> apiGateway 'Order(status=PENDING_PAYMENT)' {
+      notes 'Если покупатель не завершает оплату до истечения TTL, отрабатывает Cron (внутри OrderService): заказ отменяется и снимается резерв
       notes 'Если покупатель не завершает оплату до истечения TTL, заказ отменяется и резерв снимается.'
     }
     apiGateway -> frontend 'Order created'
