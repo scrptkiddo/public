@@ -1,0 +1,351 @@
+specification {
+  element actor {
+    style {
+      shape person
+      color gray
+    }
+  }
+  element system {
+    style {
+      shape rectangle
+      color primary
+    }
+  }
+  element ui {
+    style {
+      shape browser
+      color gray
+    }
+  }
+  element service {
+    style {
+      shape rectangle
+      color indigo
+    }
+  }
+  element external {
+    style {
+      shape rectangle
+      color amber
+    }
+  }
+  element storage {
+    style {
+      shape cylinder
+      color green
+    }
+  }
+  element bus {
+    style {
+      shape queue
+      color indigo
+    }
+  }
+  tag async
+  tag sync
+}
+
+model {
+  buyer = actor 'Покупатель' {
+    description 'Инициирует оформление и оплату заказа'
+  }
+
+  system bookshop 'Интернет-магазин книг' {
+    frontend = ui 'Frontend' {
+      icon tech:react
+      technology 'React / Next.js'
+      description 'Checkout UI, 3DS iframe'
+    }
+
+    apiGateway = service 'API Gateway' {
+      icon tech:nginx
+      technology 'Nginx / Go'
+      description 'JWT-аутентификация, маршрутизация запросов'
+    }
+
+    cartService = service 'Cart Service' {
+      icon tech:redis
+      technology 'Go / Redis'
+      description 'Валидация и управление корзиной'
+    }
+
+    inventoryService = service 'Inventory Service' {
+      icon tech:postgresql
+      technology 'Go / PostgreSQL'
+      description 'Проверка стока, soft-резервирование'
+    }
+
+    orderService = service 'Order Service' {
+      icon tech:go
+      technology 'Go / gRPC'
+      description 'Создание заказа, управление статусами'
+    }
+
+    userProfileService = service 'User Profile Service' {
+      icon tech:nodejs
+      technology 'Node.js'
+      description 'Данные пользователя, адреса, токенизированные карты'
+    }
+
+    paymentService = service 'Payment Service' {
+      icon tech:java
+      technology 'Java / Spring'
+      description 'Оркестрация платёжного флоу, обработка webhook, уточнение задержанного статуса'
+    }
+
+    notificationService = service 'Notification Service' {
+      icon tech:go
+      technology 'Go'
+      description 'Отправка email и push-уведомлений'
+    }
+
+    eventBus = bus 'Event Bus (Kafka)' {
+      icon tech:kafka
+      technology 'Apache Kafka'
+      description 'Aсинхронная шина событий (order.paid, payment.succeeded...)'
+    }
+
+    orderDb = storage 'Order DB' {
+      icon tech:postgresql
+      technology 'PostgreSQL'
+      description 'Персистентность заказов'
+    }
+
+    paymentDb = storage 'Payment DB' {
+      icon tech:postgresql
+      technology 'PostgreSQL'
+      description 'Журнал платёжных транзакций'
+    }
+  }
+
+  paymentGateway = external 'Payment Gateway' {
+    icon tech:stripe
+    technology 'Stripe / Adyen'
+    description 'Обработка карточных транзакций'
+  }
+
+  bank = external 'Банк покупателя' {
+    technology '3D-Secure API'
+    description 'Авторизация транзакции, 3DS, списание средств'
+  }
+
+  deliveryService = external 'Служба доставки (Delivery Service)' {
+    technology 'External API'
+    description 'Получает подтверждённый заказ для дальнейшей доставки'
+  }
+
+  emailProvider = external 'Email-провайдер (Email Provider)' {
+    technology 'SMTP / SendGrid'
+    description 'Рассылка транзакционных писем'
+  }
+
+  // ---- Relationships ----
+
+  buyer -> frontend 'открывает корзину, оформляет заказ'
+
+  frontend -> apiGateway 'GET /checkout/context · POST /orders · GET /orders/{orderId} · POST /orders/{orderId}/payments · GET /payments/{paymentId}  [HTTPS/REST]' {
+    navigateTo checkout_process
+    style { line dashed }
+  }
+
+  apiGateway -> cartService       'GetCart  [gRPC]'
+  apiGateway -> orderService      'CreateOrder / GetOrder  [REST]'
+  apiGateway -> userProfileService 'GetUserDefaults  [REST]'
+  apiGateway -> paymentService    'CreatePaymentAttempt / GetPayment  [REST]'
+
+  orderService -> inventoryService 'ReserveItems  [gRPC]'
+  // orderService -> orderService 'Cron: cancel expired orders'
+  orderService -> orderDb         'сохраняет в БД'
+  orderService -> eventBus        'публикует order.created / order.paid / order.cancelled'
+
+  paymentService -> paymentGateway 'POST /payment-intents · GET /payment-intents/{gatewayReference}  [HTTPS]' {
+    navigateTo checkout_process
+  }
+  paymentService -> paymentDb      'сохраняет в БД'
+  paymentService -> eventBus       'публикует payment.succeeded / payment.failed'
+
+  paymentGateway -> bank           'Authorize / 3DS  [API]'
+  paymentGateway -> paymentService 'Webhook: POST /integrations/payments/webhooks  [HTTPS]'
+
+  frontend -> bank 'Редирект для подтверждения 3DS'
+
+  eventBus -> orderService          'payment.succeeded / payment.failed -> обновление статуса заказа' {
+    style { line dashed }
+  }
+  eventBus -> cartService           'order.paid -> очистка корзины' {
+    style { line dashed }
+  }
+  eventBus -> notificationService   'order.paid -> отправка email' {
+    style { line dashed }
+  }
+  eventBus -> inventoryService      'order.cancelled -> снятие резерва' {
+    style { line dashed }
+  }
+  eventBus -> deliveryService       'order.paid -> запуск доставки' {
+    style { line dashed }
+  }
+
+  notificationService -> emailProvider 'SendEmail  [SMTP/API]'
+  emailProvider -> buyer 'Email с подтверждением заказа'
+}
+
+views {
+
+  view index {
+    title 'Общая архитектура'
+    include
+      buyer,
+      paymentGateway,
+      bank,
+      deliveryService,
+      emailProvider,
+      bookshop
+      
+    autoLayout TopBottom
+    rank source {
+      buyer
+    }
+    rank sink {
+      bank,
+      deliveryService,
+      emailProvider
+    }
+    style buyer {
+      color gray
+    }
+  }
+
+  view architecture_detail of bookshop {
+    title 'Детальная архитектура'
+    description '''
+      Детальная структура компонентов checkout и оплаты.
+      Этот view является drill-down из общего архитектурного представления.
+    '''
+
+    include
+      frontend,
+      apiGateway,
+      cartService,
+      userProfileService,
+      inventoryService,
+      orderService,
+      paymentService,
+      notificationService,
+      eventBus,
+      buyer,
+      paymentGateway,
+      bank,
+      deliveryService,
+      emailProvider
+
+    autoLayout TopBottom
+
+    rank source {
+      buyer,
+      frontend
+    }
+
+    rank sink {
+      emailProvider,
+      deliveryService
+    }
+  }
+
+  dynamic view checkout_process {
+    title 'Процесс checkout и оплаты'
+    description '''
+      Один dynamic view LikeC4 для сценария checkout и оплаты.
+      в published UI он переключается между diagram и sequence
+      и поддерживает интерактивный walkthrough по шагам.
+    '''
+
+    include
+      buyer,
+      frontend,
+      apiGateway,
+      cartService,
+      userProfileService,
+      inventoryService,
+      orderService,
+      paymentService,
+      paymentGateway,
+      bank,
+      eventBus,
+      notificationService,
+      emailProvider,
+      deliveryService
+
+    buyer -> frontend 'Нажимает «Оформить заказ»'
+    frontend -> apiGateway 'GET /checkout/context [HTTPS/REST]'
+    parallel {
+      apiGateway -> cartService 'GetCart [gRPC]'
+      cartService -> apiGateway 'Содержимое корзины (CartSnapshot)'
+
+      apiGateway -> userProfileService 'GetUserDefaults [REST]'
+      userProfileService -> apiGateway 'Адрес + Способы оплаты'
+    }
+    apiGateway -> frontend 'Данные для страницы (CheckoutContext)'
+    frontend -> buyer 'Отображение заполненного checkout'
+
+    buyer -> frontend 'Подтверждает заказ'
+    frontend -> apiGateway 'POST /orders [HTTPS/REST]'
+    apiGateway -> orderService 'CreateOrder [REST]'
+    parallel {
+      orderService -> inventoryService 'ReserveItems [gRPC]'
+      inventoryService -> orderService 'ID резервации + TTL'
+      
+      orderService -> cartService 'GetCart [gRPC]'
+      cartService -> orderService 'Содержимое корзины (CartSnapshot)'
+    }
+    orderService -> eventBus 'Событие: order.created'
+    orderService -> apiGateway 'Данные заказа (status=PENDING_PAYMENT)' {
+      notes 'Если покупатель не завершает оплату до истечения TTL, отрабатывает Cron (внутри OrderService): заказ отменяется и снимается резерв.'
+    }
+    apiGateway -> frontend 'Заказ создан'
+
+    buyer -> frontend 'Запускает оплату'
+    frontend -> apiGateway 'POST /orders/{orderId}/payments [HTTPS/REST]'
+    apiGateway -> paymentService 'CreatePaymentAttempt [REST]'
+    paymentService -> paymentGateway 'POST /payment-intents [HTTPS]' {
+      notes '''
+        Idempotency key = orderId.
+        Альтернативные исходы этого шага: FAILED, повторная попытка оплаты,
+        delayed status и необходимость дополнительного подтверждения.
+      '''
+    }
+    paymentGateway -> paymentService 'ID платежа + статус (payment_intent_id)'
+    paymentService -> apiGateway 'Данные платежа (status=PROCESSING | REQUIRES_ACTION)'
+    apiGateway -> frontend 'Ответ по оплате / nextAction'
+    paymentGateway -> bank 'Authorize / 3DS [API]'
+    bank -> paymentGateway 'Результат авторизации'
+    frontend -> apiGateway 'GET /payments/{paymentId} [HTTPS/REST]' {
+      notes 'Опционально: используется, если frontend ещё не получил финальный статус оплаты.'
+    }
+    apiGateway -> paymentService 'GetPayment [REST]'
+    paymentService -> paymentGateway 'GET /payment-intents/{gatewayReference} [HTTPS]' {
+      notes 'Опционально: используется для уточнения delayed status у внешнего платёжного шлюза.'
+    }
+    paymentGateway -> paymentService 'Текущий / финальный статус оплаты'
+    paymentService -> apiGateway 'Данные платежа (status=PROCESSING | SUCCEEDED | FAILED)'
+    apiGateway -> frontend 'Обновленный статус оплаты'
+    paymentGateway -> paymentService 'Результат Webhook [HTTPS]' {
+      notes 'Если статус уже был уточнён через polling, callback обрабатывается идемпотентно.'
+    }
+    paymentService -> eventBus 'Событие: payment.succeeded'
+    eventBus -> orderService 'Событие: payment.succeeded'
+    orderService -> eventBus 'Событие: order.paid'
+    parallel {
+      eventBus -> notificationService 'Событие: order.paid'
+      eventBus -> deliveryService 'Событие: order.paid'
+    }
+    notificationService -> emailProvider 'Отправка Email [SMTP/API]'
+    emailProvider -> buyer 'Email с подтверждением заказа'
+
+    frontend -> apiGateway 'GET /orders/{orderId} [HTTPS/REST]'
+    apiGateway -> orderService 'GetOrder [REST]'
+    orderService -> apiGateway 'Данные заказа (status=PAID)'
+    apiGateway -> frontend 'Сводка по заказу (Order summary)'
+    frontend -> buyer 'Экран подтверждения'
+  }
+
+}
