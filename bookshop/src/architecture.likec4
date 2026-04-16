@@ -191,7 +191,7 @@ model {
 
 views {
 
-  view bookshop {
+  view index {
     title 'Общая архитектура'
     include
       buyer,
@@ -255,7 +255,7 @@ views {
     title 'Процесс checkout и оплаты'
     description '''
       Один dynamic view LikeC4 для сценария checkout и оплаты.
-      в published UI он переключается между `diagram` и `sequence`
+      в published UI он переключается между diagram и sequence
       и поддерживает интерактивный walkthrough по шагам.
     '''
 
@@ -309,7 +309,7 @@ views {
     paymentService -> paymentGateway 'POST /payment-intents [HTTPS]' {
       notes '''
         Idempotency key = orderId.
-        Альтернативные исходы этого шага: `FAILED`, повторная попытка оплаты,
+        Альтернативные исходы этого шага: FAILED, повторная попытка оплаты,
         delayed status и необходимость дополнительного подтверждения.
       '''
     }
