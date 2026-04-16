@@ -414,7 +414,7 @@ views {
   // LEVEL 0: SYSTEM CONTEXT - Highest level overview
   // ============================================================================
   
-  view parser_index {
+  view parser {
     title "L0: System Context - Job Monitoring Bot"
     description "System context showing external actors and the main bot system. Click the 'Job Monitoring Bot' element to drill down to L1 system architecture."
     

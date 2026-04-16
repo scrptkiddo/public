@@ -191,7 +191,7 @@ model {
 
 views {
 
-  view index {
+  view bookshop {
     title 'Общая архитектура'
     include
       buyer,
