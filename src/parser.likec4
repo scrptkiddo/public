@@ -50,20 +50,6 @@ specification {
       // color muted
     }
   }
-  element external {
-    notation "External System"
-    style {
-      shape rectangle
-      // color muted
-    }
-  }
-  element system {
-    notation "System"
-    style {
-      shape rectangle
-      opacity 20%
-    }
-  }
   element container {
     notation "Container"
     style {
@@ -428,7 +414,7 @@ views {
   // LEVEL 0: SYSTEM CONTEXT - Highest level overview
   // ============================================================================
   
-  view index {
+  view parser_index {
     title "L0: System Context - Job Monitoring Bot"
     description "System context showing external actors and the main bot system. Click the 'Job Monitoring Bot' element to drill down to L1 system architecture."
     
