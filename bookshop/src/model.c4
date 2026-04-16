@@ -201,7 +201,23 @@ views {
       bookshop
       
     autoLayout TopBottom
+    
+    // Using edge styles to try to push buyer upwards or others down if possible.
     exclude emailProvider -> buyer
+
+    
+    // Make buyer the ONLY pure source by removing the reverse email edge
+    exclude emailProvider -> buyer
+    
+    // Prevent Payment Gateway from becoming a source node due to its webhook.
+    // By ignoring the webhook in this view, Payment Gateway only receives traffic 
+    // from Bookshop, pushing it (and the Bank) down to the bottom with the others.
+    exclude paymentGateway -> paymentService
+    
+    // The webhook from Payment Gateway to the bookshop creates a cycle that 
+    // forces Payment Gateway to the top. Exclude the webhook in the high-level view.
+    
+    exclude bank -> paymentGateway
     
     style buyer {
       color gray
