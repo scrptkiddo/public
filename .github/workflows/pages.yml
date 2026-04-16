@@ -33,13 +33,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build with LikeC4 CLI
+      - name: Build Bookshop Diagram
         run: |
-          npx likec4 build \
-            --output dist \
-            --base "${{ steps.pages.outputs.base_path || '/' }}" \
+          npx likec4 build ./bookshop \
+            --output dist/bookshop \
+            --base "${{ steps.pages.outputs.base_path || '' }}/bookshop/" \
+            --use-hash-history
+
+      - name: Build Parser Bot Diagram
+        run: |
+          npx likec4 build ./parser \
+            --output dist/parser \
+            --base "${{ steps.pages.outputs.base_path || '' }}/parser/" \
             --use-hash-history
           
+      - name: Copy Root Index
+        run: cp index.html dist/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
